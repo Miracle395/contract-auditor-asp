@@ -5,6 +5,7 @@
 import { createServer } from 'http';
 import { auditCode } from './audit-engine.mjs';
 import { fetchSource, inferLanguageFromUrl } from './fetch-source.mjs';
+import { getPaymentRequirements, decodePaymentHeader, verifyPayment, settlePayment } from './x402.mjs';
 
 const PORT = process.env.PORT || 3000;
 const REQUEST_TIMEOUT_MS = 60000;
@@ -33,6 +34,57 @@ function readBody(req, maxBytes = 500000) {
 }
 
 async function handleAudit(req, res) {
+  const resourceUrl = `http://${req.headers.host}/audit`;
+  const paymentRequirements = getPaymentRequirements(resourceUrl);
+  const paymentHeader = req.headers['x-payment'];
+
+  if (!paymentHeader) {
+    res.writeHead(402, {
+      'Content-Type': 'application/json',
+      'PAYMENT-REQUIRED': Buffer.from(JSON.stringify(paymentRequirements)).toString('base64'),
+    });
+    res.end(JSON.stringify({
+      status: 'error',
+      error_code: 'payment_required',
+      message: 'This endpoint requires payment. See PAYMENT-REQUIRED header for details.',
+      accepts: [paymentRequirements],
+    }, null, 2));
+    return;
+  }
+
+  const paymentPayload = decodePaymentHeader(paymentHeader);
+  if (!paymentPayload) {
+    res.writeHead(400, { 'Content-Type': 'application/json' });
+    res.end(JSON.stringify({
+      status: 'error',
+      error_code: 'invalid_payment',
+      message: 'X-PAYMENT header could not be decoded.',
+    }, null, 2));
+    return;
+  }
+
+  const verifyResult = await verifyPayment(paymentPayload, paymentRequirements);
+  if (!verifyResult?.data?.success) {
+    res.writeHead(402, { 'Content-Type': 'application/json' });
+    res.end(JSON.stringify({
+      status: 'error',
+      error_code: 'payment_verification_failed',
+      message: verifyResult?.data?.errorMessage || 'Payment verification failed.',
+    }, null, 2));
+    return;
+  }
+
+  const settleResult = await settlePayment(paymentPayload, paymentRequirements);
+  if (!settleResult?.data?.success) {
+    res.writeHead(402, { 'Content-Type': 'application/json' });
+    res.end(JSON.stringify({
+      status: 'error',
+      error_code: 'payment_settlement_failed',
+      message: settleResult?.data?.errorMessage || 'Payment settlement failed.',
+    }, null, 2));
+    return;
+  }
+
   const timeout = setTimeout(() => {
     if (!res.writableEnded) {
       sendJson(res, 504, {
