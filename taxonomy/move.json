@@ -1,0 +1,82 @@
+{
+  "language": "move",
+  "categories": [
+    {
+      "id": "move-capability-leak",
+      "name": "Capability / object ownership leak",
+      "severity_default": "critical",
+      "patterns": [
+        "Admin/owner capability object returned or transferred to a function caller instead of the deployer",
+        "Capability struct lacking 'key' + no store guard, allowing it to be dropped or duplicated unsafely",
+        "Shared object exposed with public mutation entry points that should be owned/restricted instead"
+      ]
+    },
+    {
+      "id": "move-entry-visibility",
+      "name": "Entry function visibility mistakes",
+      "severity_default": "high",
+      "patterns": [
+        "Function that moves value or mutates shared state marked 'public' instead of 'entry', allowing programmable-transaction composition to bypass intended call flow",
+        "Missing entry modifier on functions meant to be the sole external interface, allowing internal helper misuse",
+        "Friend/package-visibility functions unintentionally exposed as fully public"
+      ]
+    },
+    {
+      "id": "move-arg-order",
+      "name": "Positional argument order mismatch",
+      "severity_default": "critical",
+      "patterns": [
+        "Function signature argument order does not match the order values are constructed/passed at call sites (e.g. proof_bytes/public_inputs swapped)",
+        "Struct field order in a Move struct differs from the order the off-chain client serializes fields in",
+        "Vector of mixed-purpose values (e.g. amounts and IDs) passed positionally without type-level distinction, risking silent swaps"
+      ]
+    },
+    {
+      "id": "move-generic-type-safety",
+      "name": "Generic type parameter misuse",
+      "severity_default": "high",
+      "patterns": [
+        "Generic coin/type parameter not validated against an expected type before use, allowing arbitrary type substitution",
+        "Witness pattern implemented without one-time-witness (OTW) guarantee, allowing coin/type re-initialization"
+      ]
+    },
+    {
+      "id": "move-verifier-integration",
+      "name": "External verifier / proof integration",
+      "severity_default": "critical",
+      "patterns": [
+        "public_inputs passed as nested/structured type (Vec<Bytes>) when the verifier expects a flat Bytes, or vice versa",
+        "Verifying key byte length not validated before use, risking silent truncation/padding mismatches",
+        "Field ordering of public inputs not explicitly documented or enforced at the call site"
+      ]
+    },
+    {
+      "id": "move-shared-object-race",
+      "name": "Shared object contention / race",
+      "severity_default": "medium",
+      "patterns": [
+        "Shared object with high-frequency mutation causing consensus contention, no owned-object fast path considered",
+        "Dynamic field access pattern that assumes exclusive access without accounting for concurrent transactions"
+      ]
+    },
+    {
+      "id": "move-config-drift",
+      "name": "Deployment / package ID drift",
+      "severity_default": "high",
+      "patterns": [
+        "Hardcoded package/object IDs that differ between testnet and mainnet without a config abstraction",
+        "Upgrade capability not properly transferred or secured post-deployment",
+        "Module init function assumptions that silently fail to configure state if called in the wrong context"
+      ]
+    },
+    {
+      "id": "move-abort-codes",
+      "name": "Abort code clarity & handling",
+      "severity_default": "low",
+      "patterns": [
+        "Numeric abort codes with no documented meaning, making on-chain failures hard to diagnose from a client",
+        "Same abort code reused for multiple distinct failure conditions, causing ambiguous error handling downstream"
+      ]
+    }
+  ]
+}

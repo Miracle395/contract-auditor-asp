@@ -1,0 +1,86 @@
+{
+  "language": "solidity",
+  "categories": [
+    {
+      "id": "sol-reentrancy",
+      "name": "Reentrancy",
+      "severity_default": "critical",
+      "patterns": [
+        "External call (.call, .transfer, .send, or external contract invocation) before state update (checks-effects-interactions violation)",
+        "Missing reentrancy guard on functions that transfer value or call external contracts",
+        "Cross-function reentrancy: shared state mutated by one function while another is mid-external-call"
+      ]
+    },
+    {
+      "id": "sol-unchecked-external-call",
+      "name": "Unchecked external call / silent failure",
+      "severity_default": "high",
+      "patterns": [
+        "Return value of low-level .call() not checked, allowing silent failure",
+        "Assuming .transfer()/.send() success without handling the false/revert case",
+        "Delegatecall to untrusted or user-supplied address"
+      ]
+    },
+    {
+      "id": "sol-abi-encoding-mismatch",
+      "name": "ABI encoding / interface mismatch",
+      "severity_default": "critical",
+      "patterns": [
+        "Function selector collision from mismatched signatures between interface and implementation",
+        "abi.encode vs abi.encodePacked used inconsistently between signing and verification, breaking signature checks",
+        "Struct field order mismatch between contract and off-chain encoding (client encodes differently than contract expects)",
+        "Mismatched parameter types between a proxy's low-level call and the implementation's expected calldata"
+      ]
+    },
+    {
+      "id": "sol-storage-collision",
+      "name": "Storage layout / upgrade collision",
+      "severity_default": "critical",
+      "patterns": [
+        "Proxy pattern where implementation storage layout does not match proxy slot layout",
+        "Adding/reordering state variables in an upgrade, shifting existing storage slots",
+        "Missing storage gaps in upgradeable base contracts"
+      ]
+    },
+    {
+      "id": "sol-access-control",
+      "name": "Access control gaps",
+      "severity_default": "critical",
+      "patterns": [
+        "Missing onlyOwner/role modifier on state-changing or fund-moving functions",
+        "tx.origin used for authorization instead of msg.sender",
+        "Initializer function callable multiple times or by any address (missing initializer guard)"
+      ]
+    },
+    {
+      "id": "sol-arithmetic",
+      "name": "Arithmetic & precision",
+      "severity_default": "medium",
+      "patterns": [
+        "Division before multiplication causing precision loss",
+        "Unsafe casting between uint sizes truncating values",
+        "Rounding direction inconsistently favors the wrong party across similar functions"
+      ]
+    },
+    {
+      "id": "sol-env-config",
+      "name": "Deployment / configuration drift",
+      "severity_default": "high",
+      "patterns": [
+        "Hardcoded addresses that differ between testnet and mainnet without a config abstraction",
+        "Constructor/initializer args that silently default to zero/empty if not explicitly passed",
+        "Chain-ID-specific logic not guarded"
+      ]
+    },
+    {
+      "id": "sol-verifier-integration",
+      "name": "External verifier / oracle integration",
+      "severity_default": "critical",
+      "patterns": [
+        "Verifying key or trusted setup data truncated, padded, or malformed relative to what the proving system expects",
+        "Public inputs passed in wrong order or wrong type (array vs flat) to a verifier contract",
+        "No freshness check on oracle-supplied data before using it in a bounds check"
+      ]
+    }
+  ]
+}
