@@ -34,19 +34,14 @@ function readBody(req, maxBytes = 500000) {
 }
 
 async function handleAudit(req, res) {
-  const resourceUrl = `http://${req.headers.host}/audit`;
+  const resourceUrl = `https://${req.headers.host}/audit`;
   const paymentRequirements = getPaymentRequirements(resourceUrl);
   const paymentHeader = req.headers['x-payment'];
 
   if (!paymentHeader) {
-    res.writeHead(402, {
-      'Content-Type': 'application/json',
-      'PAYMENT-REQUIRED': Buffer.from(JSON.stringify(paymentRequirements)).toString('base64'),
-    });
+    res.writeHead(402, { 'Content-Type': 'application/json' });
     res.end(JSON.stringify({
-      status: 'error',
-      error_code: 'payment_required',
-      message: 'This endpoint requires payment. See PAYMENT-REQUIRED header for details.',
+      x402Version: 2,
       accepts: [paymentRequirements],
     }, null, 2));
     return;
