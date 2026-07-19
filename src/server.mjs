@@ -10,8 +10,8 @@ import { getPaymentRequirements, buildX402Challenge, decodePaymentHeader, verify
 const PORT = process.env.PORT || 3000;
 const REQUEST_TIMEOUT_MS = 60000;
 
-function sendJson(res, statusCode, obj) {
-  res.writeHead(statusCode, { 'Content-Type': 'application/json' });
+function sendJson(res, statusCode, obj, extraHeaders = {}) {
+  res.writeHead(statusCode, { 'Content-Type': 'application/json', ...extraHeaders });
   res.end(JSON.stringify(obj, null, 2));
 }
 
@@ -81,6 +81,19 @@ async function handleAudit(req, res) {
     }, null, 2));
     return;
   }
+
+  // Build PAYMENT-RESPONSE header with settlement receipt per x402 v2 standard
+  const paymentResponse = {
+    status: 'success',
+    amount: paymentRequirements.amount,
+    asset: paymentRequirements.asset,
+    network: paymentRequirements.network,
+    payTo: paymentRequirements.payTo,
+    payer: paymentPayload.payer || paymentPayload.from,
+    transaction: settleResult.data?.transactionHash || settleResult.data?.txHash,
+    timestamp: new Date().toISOString(),
+  };
+  const paymentResponseB64 = Buffer.from(JSON.stringify(paymentResponse)).toString('base64');
 
   const timeout = setTimeout(() => {
     if (!res.writableEnded) {
@@ -165,7 +178,7 @@ async function handleAudit(req, res) {
     const result = await auditCode({ language: resolvedLanguage, code: resolvedCode });
     clearTimeout(timeout);
     const statusCode = result.status === 'ok' ? 200 : 500;
-    return sendJson(res, statusCode, result);
+    return sendJson(res, statusCode, result, { 'PAYMENT-RESPONSE': paymentResponseB64 });
   } catch (err) {
     clearTimeout(timeout);
     if (!res.writableEnded) {
