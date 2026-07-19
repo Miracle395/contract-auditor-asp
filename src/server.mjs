@@ -5,7 +5,7 @@
 import { createServer } from 'http';
 import { auditCode } from './audit-engine.mjs';
 import { fetchSource, inferLanguageFromUrl } from './fetch-source.mjs';
-import { getPaymentRequirements, decodePaymentHeader, verifyPayment, settlePayment } from './x402.mjs';
+import { getPaymentRequirements, buildX402Challenge, decodePaymentHeader, verifyPayment, settlePayment } from './x402.mjs';
 
 const PORT = process.env.PORT || 3000;
 const REQUEST_TIMEOUT_MS = 60000;
@@ -39,11 +39,13 @@ async function handleAudit(req, res) {
   const paymentHeader = req.headers['x-payment'];
 
   if (!paymentHeader) {
-    res.writeHead(402, { 'Content-Type': 'application/json' });
-    res.end(JSON.stringify({
-      x402Version: 2,
-      accepts: [paymentRequirements],
-    }, null, 2));
+    const challenge = buildX402Challenge(resourceUrl);
+    const challengeB64 = Buffer.from(JSON.stringify(challenge)).toString('base64');
+    res.writeHead(402, {
+      'Content-Type': 'application/json',
+      'PAYMENT-REQUIRED': challengeB64,
+    });
+    res.end(JSON.stringify(challenge, null, 2));
     return;
   }
 

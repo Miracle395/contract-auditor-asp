@@ -45,15 +45,19 @@ export function getPaymentRequirements(resourceUrl) {
     asset: ASSET_USDC,
     payTo: PAY_TO_ADDRESS,
     maxTimeoutSeconds: 60,
-    resource: {
-      url: resourceUrl,
-      description: RESOURCE_DESCRIPTION,
-      mimeType: 'application/json',
-    },
     extra: {
       name: 'USDC',
       version: '2',
     },
+  };
+}
+
+export function buildX402Challenge(resourceUrl) {
+  const paymentRequirements = getPaymentRequirements(resourceUrl);
+  return {
+    x402Version: 2,
+    resource: resourceUrl,
+    accepts: [paymentRequirements],
   };
 }
 
