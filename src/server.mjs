@@ -71,12 +71,15 @@ async function handleAudit(req, res) {
   console.log('[x402] Payment received:', {
     payer: paymentPayload.payer || paymentPayload.from,
     amount: paymentPayload.amount,
-    allPayloadKeys: Object.keys(paymentPayload)
+    allPayloadKeys: Object.keys(paymentPayload),
+    fullPayload: JSON.stringify(paymentPayload)
   });
+  console.log('[x402] Payment requirements:', JSON.stringify(paymentRequirements));
 
   console.log('[x402] Verifying payment...');
+  console.log('[x402] Sending to OKX verify API:', JSON.stringify({ x402Version: 2, paymentPayload, paymentRequirements }));
   const verifyResult = await verifyPayment(paymentPayload, paymentRequirements);
-  console.log('[x402] Verify result:', { success: verifyResult?.data?.success, code: verifyResult?.code });
+  console.log('[x402] Full verify result:', JSON.stringify(verifyResult, null, 2));
   if (!verifyResult?.data?.success) {
     console.error('[x402] Payment verification failed:', JSON.stringify(verifyResult, null, 2));
     res.writeHead(402, { 'Content-Type': 'application/json' });
