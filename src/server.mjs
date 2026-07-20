@@ -60,24 +60,32 @@ async function handleAudit(req, res) {
     return;
   }
 
+  console.log('[x402] Payment received:', { payer: paymentPayload.payer || paymentPayload.from, amount: paymentPayload.amount });
+
+  console.log('[x402] Verifying payment...');
   const verifyResult = await verifyPayment(paymentPayload, paymentRequirements);
+  console.log('[x402] Verify result:', { success: verifyResult?.data?.success, code: verifyResult?.code });
   if (!verifyResult?.data?.success) {
+    console.error('[x402] Payment verification failed:', JSON.stringify(verifyResult, null, 2));
     res.writeHead(402, { 'Content-Type': 'application/json' });
     res.end(JSON.stringify({
       status: 'error',
       error_code: 'payment_verification_failed',
       message: verifyResult?.data?.errorMessage || 'Payment verification failed.',
+      debug: process.env.NODE_ENV === 'development' ? verifyResult : undefined,
     }, null, 2));
     return;
   }
 
   const settleResult = await settlePayment(paymentPayload, paymentRequirements);
   if (!settleResult?.data?.success) {
+    console.error('[x402] Payment settlement failed:', JSON.stringify(settleResult, null, 2));
     res.writeHead(402, { 'Content-Type': 'application/json' });
     res.end(JSON.stringify({
       status: 'error',
       error_code: 'payment_settlement_failed',
       message: settleResult?.data?.errorMessage || 'Payment settlement failed.',
+      debug: process.env.NODE_ENV === 'development' ? settleResult : undefined,
     }, null, 2));
     return;
   }
