@@ -68,13 +68,21 @@ async function handleAudit(req, res) {
     return;
   }
 
-  console.log('[x402] Payment received:', {
-    payer: paymentPayload.payer || paymentPayload.from,
-    amount: paymentPayload.amount,
-    allPayloadKeys: Object.keys(paymentPayload),
-    fullPayload: JSON.stringify(paymentPayload)
-  });
-  console.log('[x402] Payment requirements:', JSON.stringify(paymentRequirements));
+  console.log('[x402] ===== PAYMENT PAYLOAD STRUCTURE =====');
+  console.log('[x402] Top-level keys:', Object.keys(paymentPayload));
+  console.log('[x402] Has payload?', 'payload' in paymentPayload);
+  if (paymentPayload.payload) {
+    console.log('[x402] payload keys:', Object.keys(paymentPayload.payload));
+    console.log('[x402] Has authorization?', 'authorization' in paymentPayload.payload);
+    console.log('[x402] Has permit2Authorization?', 'permit2Authorization' in paymentPayload.payload);
+    console.log('[x402] Has signature?', 'signature' in paymentPayload.payload);
+    if (paymentPayload.payload.authorization) {
+      console.log('[x402] authorization keys:', Object.keys(paymentPayload.payload.authorization));
+    }
+  }
+  console.log('[x402] Full paymentPayload:', JSON.stringify(paymentPayload, null, 2));
+  console.log('[x402] Full paymentRequirements:', JSON.stringify(paymentRequirements, null, 2));
+  console.log('[x402] ===== END PAYMENT PAYLOAD =====');
 
   console.log('[x402] Verifying payment...');
   console.log('[x402] Sending to OKX verify API:', JSON.stringify({ x402Version: 2, paymentPayload, paymentRequirements }));
