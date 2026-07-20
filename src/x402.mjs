@@ -7,7 +7,7 @@ import crypto from 'crypto';
 const OKX_BASE_URL = 'https://web3.okx.com';
 const PAY_TO_ADDRESS = '0xf1E2d92708B21d49878997BAad7BF60a26808e1b';
 const NETWORK = 'eip155:196'; // X Layer
-const ASSET_USDT = '0x1E4a5963aBFD975d8c9021ce480b42188849D41d'; // USDT on X Layer (6 decimals)
+const ASSET_USDT = '0x779ded0c9e1022225f8e0630b35a9b54be713736'; // USDT on X Layer (6 decimals) - OKX AI task system address
 const PRICE_USDT_BASE_UNITS = '100000'; // $0.10 USDT
 const RESOURCE_DESCRIPTION = 'Smart contract security audit (Solidity/Move) - single call';
 
