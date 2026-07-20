@@ -34,6 +34,14 @@ function readBody(req, maxBytes = 500000) {
 }
 
 async function handleAudit(req, res) {
+  // Log full request details for debugging
+  console.log('[x402] Request received:', {
+    method: req.method,
+    url: req.url,
+    headers: Object.keys(req.headers),
+    hasPayment: !!req.headers['x-payment'],
+  });
+
   const resourceUrl = `https://${req.headers.host}/audit`;
   const paymentRequirements = getPaymentRequirements(resourceUrl);
   const paymentHeader = req.headers['x-payment'];
@@ -60,7 +68,11 @@ async function handleAudit(req, res) {
     return;
   }
 
-  console.log('[x402] Payment received:', { payer: paymentPayload.payer || paymentPayload.from, amount: paymentPayload.amount });
+  console.log('[x402] Payment received:', {
+    payer: paymentPayload.payer || paymentPayload.from,
+    amount: paymentPayload.amount,
+    allPayloadKeys: Object.keys(paymentPayload)
+  });
 
   console.log('[x402] Verifying payment...');
   const verifyResult = await verifyPayment(paymentPayload, paymentRequirements);
@@ -115,10 +127,12 @@ async function handleAudit(req, res) {
 
   try {
     const raw = await readBody(req);
+    console.log('[x402] Request body length:', raw.length, 'bytes');
 
     let input;
     try {
       input = raw ? JSON.parse(raw) : {};
+      console.log('[x402] Parsed input fields:', Object.keys(input));
     } catch {
       clearTimeout(timeout);
       return sendJson(res, 400, {
