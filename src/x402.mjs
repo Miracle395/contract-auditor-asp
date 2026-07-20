@@ -94,7 +94,11 @@ export function decodePaymentHeader(headerValue) {
 
 export async function verifyPayment(paymentPayload, paymentRequirements) {
   const requestPath = '/api/v6/pay/x402/verify';
-  const body = { x402Version: 2, paymentPayload, paymentRequirements };
+  // Flatten the structure - API likely expects fields at top level
+  const body = {
+    ...paymentPayload,
+    ...paymentRequirements,
+  };
   const bodyStr = JSON.stringify(body);
   const headers = buildAuthHeaders('POST', requestPath, bodyStr);
 
@@ -104,7 +108,11 @@ export async function verifyPayment(paymentPayload, paymentRequirements) {
 
 export async function settlePayment(paymentPayload, paymentRequirements) {
   const requestPath = '/api/v6/pay/x402/settle';
-  const body = { x402Version: 2, paymentPayload, paymentRequirements };
+  // Flatten the structure - API likely expects fields at top level
+  const body = {
+    ...paymentPayload,
+    ...paymentRequirements,
+  };
   const bodyStr = JSON.stringify(body);
   const headers = buildAuthHeaders('POST', requestPath, bodyStr);
 
