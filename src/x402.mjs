@@ -45,6 +45,7 @@ export function getPaymentRequirements(resourceUrl) {
     asset: ASSET_USDT,
     payTo: PAY_TO_ADDRESS,
     maxTimeoutSeconds: 60,
+    decimals: 6,
     extra: {
       name: 'USDT',
       version: '2',
