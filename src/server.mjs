@@ -80,13 +80,14 @@ async function handleAudit(req, res) {
   console.log('[x402] Sending to OKX verify API:', JSON.stringify({ x402Version: 2, paymentPayload, paymentRequirements }));
   const verifyResult = await verifyPayment(paymentPayload, paymentRequirements);
   console.log('[x402] Full verify result:', JSON.stringify(verifyResult, null, 2));
-  if (!verifyResult?.data?.success) {
+  // Per OKX docs: verify returns data.isValid (not data.success)
+  if (!verifyResult?.data?.isValid) {
     console.error('[x402] Payment verification failed:', JSON.stringify(verifyResult, null, 2));
     res.writeHead(402, { 'Content-Type': 'application/json' });
     res.end(JSON.stringify({
       status: 'error',
       error_code: 'payment_verification_failed',
-      message: verifyResult?.data?.errorMessage || 'Payment verification failed.',
+      message: verifyResult?.data?.invalidMessage || verifyResult?.msg || 'Payment verification failed.',
       debug: process.env.NODE_ENV === 'development' ? verifyResult : undefined,
     }, null, 2));
     return;
