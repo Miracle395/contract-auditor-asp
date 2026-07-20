@@ -7,8 +7,8 @@ import crypto from 'crypto';
 const OKX_BASE_URL = 'https://web3.okx.com';
 const PAY_TO_ADDRESS = '0xf1E2d92708B21d49878997BAad7BF60a26808e1b';
 const NETWORK = 'eip155:196'; // X Layer
-const ASSET_USDC = '0x74b7F16337b8972027F6196A17a631aC6dE26d22'; // USDC on X Layer (6 decimals)
-const PRICE_USDC_BASE_UNITS = '100000'; // $0.10 USDC
+const ASSET_USDT = '0x1E4a5963aBFD975d8c9021ce480b42188849D41d'; // USDT on X Layer (6 decimals)
+const PRICE_USDT_BASE_UNITS = '100000'; // $0.10 USDT
 const RESOURCE_DESCRIPTION = 'Smart contract security audit (Solidity/Move) - single call';
 
 function sign(secretKey, timestamp, method, requestPath, body) {
@@ -41,12 +41,12 @@ export function getPaymentRequirements(resourceUrl) {
   return {
     scheme: 'exact',
     network: NETWORK,
-    amount: PRICE_USDC_BASE_UNITS,
-    asset: ASSET_USDC,
+    amount: PRICE_USDT_BASE_UNITS,
+    asset: ASSET_USDT,
     payTo: PAY_TO_ADDRESS,
     maxTimeoutSeconds: 60,
     extra: {
-      name: 'USDC',
+      name: 'USDT',
       version: '2',
     },
   };
