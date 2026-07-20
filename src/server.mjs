@@ -110,7 +110,7 @@ async function handleAudit(req, res) {
 
     let input;
     try {
-      input = JSON.parse(raw);
+      input = raw ? JSON.parse(raw) : {};
     } catch {
       clearTimeout(timeout);
       return sendJson(res, 400, {
@@ -192,7 +192,7 @@ async function handleAudit(req, res) {
 }
 
 const server = createServer((req, res) => {
-  if (req.method === 'POST' && req.url === '/audit') {
+  if (req.url === '/audit' && (req.method === 'POST' || req.method === 'GET')) {
     return handleAudit(req, res);
   }
   if (req.method === 'GET' && req.url === '/health') {
