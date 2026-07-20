@@ -59,6 +59,27 @@ export function buildX402Challenge(resourceUrl) {
     x402Version: 2,
     resource: resourceUrl,
     accepts: [paymentRequirements],
+    fields: [
+      {
+        name: 'language',
+        type: 'string',
+        description: 'Smart contract language: "solidity" or "move"',
+        required: true,
+      },
+      {
+        name: 'code',
+        type: 'string',
+        description: 'Smart contract source code to audit',
+        required: false,
+      },
+      {
+        name: 'source_url',
+        type: 'string',
+        description: 'URL to fetch contract source code (alternative to "code" field)',
+        required: false,
+      },
+    ],
+    requiredAnyOf: [['code'], ['source_url']],
   };
 }
 
